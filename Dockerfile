@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine-armhf:edge
 MAINTAINER brantje <brantje@gmail.com>
 
 ARG GNU_LIBICONV_VERSION=1.14
