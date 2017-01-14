@@ -22,6 +22,7 @@ if [ ! -f /config/config.php ]; then
     # New installation, run the setup
     /usr/local/bin/setup_mysql.sh
     /usr/local/bin/setup.sh
+    echo "Done, you can login with: $ADMIN_USER:$ADMIN_PASSWORD"
 else
     occ upgrade
     if [ \( $? -ne 0 \) -a \( $? -ne 3 \) ]; then

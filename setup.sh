@@ -2,6 +2,20 @@
 # Nextcloud
 ##########################
 
+#SSL Setup
+if [[  -f /ssl/fullchain.pem || -f /ssl/privkey.pem ]]
+    then
+        echo "Using your ssl certs"
+else
+    echo "Generating certs for $HOSTNAME"
+    openssl req -new -x509 -days 3650 -nodes \
+                -out /ssl/fullchain.pem \
+                -keyout /ssl/privkey.pem \
+                -subj "/O=Nextcloud/OU=Passman/CN=$HOSTNAME"
+fi
+
+openssl dhparam -dsaparam -out /etc/ssl/dhparam.pem 4096
+
 CONFIGFILE=/config/config.php
 
 

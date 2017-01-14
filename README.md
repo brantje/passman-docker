@@ -13,10 +13,12 @@
 - GNU Libiconv for php iconv extension (avoiding errors with some apps).
 - No root processes. Never.
 - Environment variables provided (see below).
+- Diffie hellman key generated on container creation
+   
 
 ### Tags
 - **latest** : latest stable version.
-- **10.0** : latest 10.0.x version (stable)
+- **11.0** : latest 11.0.x version (stable)
 - **daily** : latest code (daily build).
 
 Other tags than `daily` are built weekly. For security reasons, you should occasionally update the container, even if you have the latest version of Nextcloud.
@@ -42,11 +44,14 @@ Other tags than `daily` are built weekly. For security reasons, you should occas
 - **DB_USER** : username for database *(default : nextcloud)*
 - **DB_PASSWORD** : password for database user *(default : random generated)*
 - **DB_HOST** : database host *(default : localhost)*
+- **HOSTNAME**: Hostname of the instance
+
 
 Don't forget to use a **strong password** for the admin account!
 
-### Port
+### Ports
 - **8888** : HTTP Nextcloud port.
+- **8443** : HTTPS Nextcloud port.
 
 ### Volumes
 - **/data** : Nextcloud data.
@@ -54,6 +59,7 @@ Don't forget to use a **strong password** for the admin account!
 - **/apps2** : Nextcloud downloaded apps.
 - **/var/lib/redis** : Redis dumpfile location.
 - **/var/lib/mysql**: Mysql database location.  
+- **/ssl**: Here we look for `fullchain.pem` and `privkey.pem`, if not found they are generated.
 
 
 ### Setup

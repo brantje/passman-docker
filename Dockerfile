@@ -114,7 +114,10 @@ COPY setup_mysql.sh /usr/local/bin/setup_mysql.sh
 RUN chmod -R +x /usr/local/bin/* /etc/s6.d/*/* /etc/s6.d/.s6-svscan/*
 VOLUME /data /config /apps2 /var/lib/redis /var/lib/mysql
 
+VOLUME /data /config /apps2 /var/lib/redis /var/lib/mysql /ssl
+
 EXPOSE 8888
+EXPOSE 8443
 
 LABEL description="A server software for creating file hosting services" \
       nextcloud="Nextcloud daily build"
