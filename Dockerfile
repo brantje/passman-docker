@@ -85,7 +85,7 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
  && tar xjf latest.tar.bz2 --strip 1 -C /nextcloud \
  && apk del ${BUILD_DEPS} php7-pear php7-dev \
  && wget https://github.com/nextcloud/passman/archive/master.zip \
-
+ && mkdir /ssl \
  && rm -rf /var/cache/apk/* /tmp/*
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY php-fpm.conf /etc/php7/php-fpm.conf
