@@ -22,6 +22,7 @@ if [ ! -f /config/config.php ]; then
     # New installation, run the setup
     /usr/local/bin/setup_mysql.sh
     /usr/local/bin/setup.sh
+    echo "Done, you can login with: $ADMIN_USER:$ADMIN_PASSWORD"
 else
     occ upgrade
     if [ \( $? -ne 0 \) -a \( $? -ne 3 \) ]; then
@@ -34,5 +35,5 @@ else
 fi
 
 chown -R $UID:$GID /nextcloud /data /config /apps2 /etc/nginx /etc/php7 /var/log /var/lib/nginx /tmp /etc/s6.d
-
 exec su-exec $UID:$GID /bin/s6-svscan /etc/s6.d
+

@@ -2,6 +2,20 @@
 # Nextcloud
 ##########################
 
+#SSL Setup
+if [[  -f /ssl/fullchain.pem || -f /ssl/privkey.pem ]]
+    then
+        echo "Using your ssl certs"
+else
+    echo "Generating certs for $HOSTNAME"
+    openssl req -new -x509 -days 3650 -nodes \
+                -out /ssl/fullchain.pem \
+                -keyout /ssl/privkey.pem \
+                -subj "/O=Nextcloud/OU=Passman/CN=$HOSTNAME"
+fi
+
+openssl dhparam -dsaparam -out /etc/ssl/dhparam.pem 4096
+
 CONFIGFILE=/config/config.php
 
 
@@ -120,5 +134,8 @@ do
     mv "/nextcloud/apps/$i-master" "/nextcloud/apps/$i"
     occ app:enable $i
 done
+occ config:system:set defaultapp --value=passman
+occ config:system:set trusted_domains 2 --value=172.17.0.2
+occ config:system:set trusted_domains 3 --value=$HOSTNAME
 echo '' > /data/nextcloud.log
 
