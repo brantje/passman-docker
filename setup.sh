@@ -5,7 +5,7 @@ echo "Dir index /ssl"
 ls -al /ssl
 
 #SSL Setup
-if [[  -f /ssl/fullchain.pem || -f /ssl/privkey.pem ]]
+if [[  -e /ssl/fullchain.pem || -e /ssl/privkey.pem ]]
     then
         echo "Using your ssl certs"
 else
