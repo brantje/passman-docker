@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine-armhf:edge
 MAINTAINER brantje <brantje@gmail.com>
 
 ARG NEXTCLOUD_VERSION=11.0.0
@@ -112,6 +112,7 @@ COPY startup /usr/local/bin/startup
 COPY s6.d /etc/s6.d
 COPY setup_mysql.sh /usr/local/bin/setup_mysql.sh
 RUN chmod -R +x /usr/local/bin/* /etc/s6.d/*/* /etc/s6.d/.s6-svscan/*
+
 VOLUME /data /config /apps2 /var/lib/redis /var/lib/mysql
 
 EXPOSE 8888
