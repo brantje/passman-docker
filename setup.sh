@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # Nextcloud
 ##########################
-echo "Dir index /ssl"
-ls -al /ssl
 
 #SSL Setup
 if [[  -e /ssl/fullchain.pem || -e /ssl/privkey.pem ]]
