@@ -7,7 +7,7 @@ export DB_NAME=nextcloud
 export DB_USER=nextcloud
 export DB_HOST=localhost
 export DB_TYPE=mysql
-export DB_PASSWORD=nextcloud_test
+export DB_PASSWORD="$(date +%s | sha256sum | base64 | head -c 32 ; echo)"
 DATA_DIR="$(mysqld --verbose --help --log-bin-index=`mktemp -u` 2>/dev/null | awk '$1 == "datadir" { print $2; exit }')"
 
 echo "Data dir: $DATA_DIR"
