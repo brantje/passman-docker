@@ -1,7 +1,9 @@
 FROM alpine:edge
 MAINTAINER brantje <brantje@gmail.com>
 
+ARG NEXTCLOUD_VERSION=11.0.0
 ARG GNU_LIBICONV_VERSION=1.14
+ARG GPG_nextcloud="2880 6A87 8AE4 23A2 8372  792E D758 99B9 A724 937A"
 
 ENV UID=991 GID=991 \
     UPLOAD_MAX_SIZE=10G \
@@ -10,15 +12,19 @@ ENV UID=991 GID=991 \
     REDIS_MAX_MEMORY=64mb \
     CRON_PERIOD=15m \
     TZ=Etc/UTC \
-    DB_TYPE=sqlite3 \
     ADMIN_USER=admin \
     ADMIN_PASSWORD=admin \
-    MYSQL_RANDOM_ROOT_PASSWORD=yes
-
+    MYSQL_RANDOM_ROOT_PASSWORD=yes \
+    DB_NAME=nextcloud \
+    DB_USER=nextcloud \
+    DB_HOST=localhost \
+    DB_TYPE=mysql \
+    DB_PASSWORD=nextcloud_test
 
 RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
  && echo "@testing https://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
  && BUILD_DEPS=" \
+    gnupg \
     tar \
     build-base \
     autoconf \
@@ -35,8 +41,8 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     samba-client \
     su-exec \
     tzdata \
-    bash \
     redis \
+    bash \
     mariadb \
     mariadb-client \
     php7@commuedge \
@@ -81,10 +87,22 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
  && ./configure --with-iconv=/usr/local --with-php-config=/usr/bin/php-config7 \
  && make && cp modules/iconv.so /usr/lib/php7/modules && cd /tmp \
  && echo "extension=iconv.so" > /etc/php7/conf.d/00_iconv.ini \
- && wget -q https://download.nextcloud.com/server/daily/latest.tar.bz2 \
- && tar xjf latest.tar.bz2 --strip 1 -C /nextcloud \
+ && NEXTCLOUD_TARBALL="nextcloud-${NEXTCLOUD_VERSION}.tar.bz2" \
+ && wget -q https://download.nextcloud.com/server/releases/${NEXTCLOUD_TARBALL} \
+ && wget -q https://download.nextcloud.com/server/releases/${NEXTCLOUD_TARBALL}.sha256 \
+ && wget -q https://download.nextcloud.com/server/releases/${NEXTCLOUD_TARBALL}.asc \
+ && wget -q https://nextcloud.com/nextcloud.asc \
+ && echo "Verifying both integrity and authenticity of ${NEXTCLOUD_TARBALL}..." \
+ && CHECKSUM_STATE=$(echo -n $(sha256sum -c ${NEXTCLOUD_TARBALL}.sha256) | tail -c 2) \
+ && if [ "${CHECKSUM_STATE}" != "OK" ]; then echo "Warning! Checksum does not match!" && exit 1; fi \
+ && gpg --import nextcloud.asc \
+ && FINGERPRINT="$(LANG=C gpg --verify ${NEXTCLOUD_TARBALL}.asc ${NEXTCLOUD_TARBALL} 2>&1 \
+  | sed -n "s#Primary key fingerprint: \(.*\)#\1#p")" \
+ && if [ -z "${FINGERPRINT}" ]; then echo "Warning! Invalid GPG signature!" && exit 1; fi \
+ && if [ "${FINGERPRINT}" != "${GPG_nextcloud}" ]; then echo "Warning! Wrong GPG fingerprint!" && exit 1; fi \
+ && echo "All seems good, now unpacking ${NEXTCLOUD_TARBALL}..." \
+ && tar xjf ${NEXTCLOUD_TARBALL} --strip 1 -C /nextcloud \
  && apk del ${BUILD_DEPS} php7-pear php7-dev \
- && wget https://github.com/nextcloud/passman/archive/master.zip \
  && rm -rf /var/cache/apk/* /tmp/*
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY php-fpm.conf /etc/php7/php-fpm.conf
@@ -96,9 +114,16 @@ COPY setup.sh /usr/local/bin/setup.sh
 COPY occ /usr/local/bin/occ
 COPY startup /usr/local/bin/startup
 COPY s6.d /etc/s6.d
-COPY setup_mysql.sh /usr/local/bin/setup_mysql.sh
 RUN chmod -R +x /usr/local/bin/* /etc/s6.d/*/* /etc/s6.d/.s6-svscan/*
-VOLUME /data /config /apps2 /var/lib/redis /var/lib/mysql /ssl
+RUN    mkdir /config \
+    && mkdir -p /var/lib/mysql \
+    && mkdir -p /var/lib/redis \
+    && mkdir /data
+
+VOLUME /ssl
+
+
+RUN /usr/local/bin/setup.sh
 
 EXPOSE 8888
 EXPOSE 8443
