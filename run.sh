@@ -26,7 +26,7 @@ echo "mysqld: ready for connections."
 
 # Put the configuration and apps into volumes
 ln -sf /config/config.php /nextcloud/config/config.php &>/dev/null
-ln -sf /apps2 /nextcloud &>/dev/null
+
 
 
 exec su-exec $UID:$GID /usr/local/bin/startup/redis/run &
